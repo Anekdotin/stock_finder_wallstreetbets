@@ -1,61 +1,46 @@
 import re
-import praw
-import config
+
+from reddit_api import reddit_api
 import datetime
 import time
-
-subs = ['wallstreetbets', 'wallstreetbetsnew']
-
-listofstocks = []
-banstuff = ['fuck', 'hold', 'vote', 'hodl', 'long', 'term',
-            'into', 'open', 'wsb', 'new',
-            'add', 'cnbc', 'real', 'pays', 'let', 'imo', 'mean',
-            'it s', 'best', 'make', 'know',
-            'look', 'mars', 'moon', 'fly', 'wsb', 'pull', 'i ll',
-            'call', 'yolo', 'apes', 'sale', 'wtf', 'for', 'made', 'lmao',
-            'all', 'day', 'down', 'zero', 'stop', 'shit', 'run', 'huge',
-            'musk', 'hold', 'wsb', 'sec', 'dip', 'fool', 'moon', 'line',
-            'the', 'have', 'aint', 'were', 'sell', 'put', 'wtf',
-            'not', 'bull', 'psa', 'rip', 'you', 'can', 'fire', 'with',
-            'your', 'some', 'next', 'buy', 'they', 'more',
-            'low', 'yes', 'yall', 'why', 'bell',
-            'out', 'fyi', 'hear', 'feel', 'like', 'are',
-            'ship', 'how', 'that', 'lose',
-            'just', 'dont', 'guys', 'lose', 'get', 'from',
-            'more', 'what', 'is', 'how',
-            'but', 'is', 'cry', 'just', 'dont', 'then',
-            'over', 'lost', 'was', 'when', 'fyi',
-            'and', 'here', 'this', 'calm', 'way', 'puts',
-            'calm', 'nyse', 'IT S', 'boys',
-            'time', 'dead', 'wont', 'give', 'ape', 'army',
-            'now', 'big', 'mac', 'mega', 'porn', 'loss', 'bear',
-            'TILL', 'take', 'off', 'keep', 'out', 'nakd',
-            'lets', 'now', 'left', 'baby', 'dips',
-            'help', 'gtfo', 'wsj', 'each', 'too',
-            'its', 'wide', 'play', 'diy', 'no', 'yes', 'elon', 'musk', 'ez',
-            'want', 'ffs', 'love', 'game', 'stay', 'fall',
-            'will', 'i m', 'ipo', 'rice',
-            'usa', 'read', 'oc', 'dfv', 'per'
-            ]
+from .cleaner.banned_words import banned_words
+from .cleaner.clean_word import clean_word
+from .cleaner.remove_space import remove_space
 
 
-def remove_space(word):
-    return word.replace(" ", "")
+subs = ['wallstreetbets', 'wallstreetbetsnew', 'stocks', 'investing']
 
 
-def clean_word(word):
-    word = re.sub(r'[^\w]', ' ', word)
-    word = word.lower()
-    word = remove_space(word)
-    return word
+class TerminalColors:
+
+    HEADER = '\033[95m'
+    BLACK = '\033[40m'
+    WHITE = '\033[47m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 
-def banned_words(word):
-    word = clean_word(word)
-    if word in banstuff:
-        return True
-    else:
-        return False
+def print_results(word, submission):
+
+    cleaned_upper = clean_word(word)
+    upper_word = cleaned_upper.upper()
+    the_time_posted = determine_time(submission)
+
+    print("")
+    print(f"{TerminalColors.ENDC}{TerminalColors.WARNING}r/{submission.subreddit}{TerminalColors.ENDC}")
+    print(submission.id)
+    print(f"{TerminalColors.ENDC}{TerminalColors.OKCYAN}{submission.title}{TerminalColors.ENDC}")
+    print(the_time_posted)
+    print(f"{TerminalColors.ENDC}Stock Found: {TerminalColors.OKGREEN}${upper_word}{TerminalColors.ENDC} ")
+    print("")
+
+
 
 
 def hasnumbers(word):
@@ -77,39 +62,21 @@ def appendword(word):
 
 def valid_symbol(word):
     if word.startswith('$'):
-        appendword(word)
         return True
 
     elif (len(word) == 3 or len(word) == 4) and word.isupper():
-        appendword(word)
         return True
 
     else:
         return False
 
 
-def print_results(word, submission):
-
-    cleaned_upper = clean_word(word)
-    upper_word = cleaned_upper.upper()
-    the_time_posted = determine_time(submission)
-    print("*" * 10)
-    print(submission.id)
-    print(submission.title)
-    print(the_time_posted)
-    print("stock found: $" + upper_word)
-    print("")
-
-
 def main():
-    reddit = praw.Reddit(client_id=config.client_id,
-                         client_secret=config.client_secret,
-                         password=config.password,
-                         user_agent=config.user_agent,
-                         username=config.username)
+    reddit = reddit_api
+
     for sub in subs:
         subreddit = reddit.subreddit(sub)
-        submissions = subreddit.new(limit=50)
+        submissions = subreddit.new(limit=20)
         for submission in submissions:
 
             time.sleep(1)
@@ -119,6 +86,7 @@ def main():
 
                 if (len(f) == 3 or len(f) == 4) and f.isupper():
                     hasnumber = hasnumbers(f)
+
                     bannedword = banned_words(f)
 
                     if hasnumber is False and bannedword is False:

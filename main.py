@@ -1,10 +1,6 @@
 from app.intel_rwallstreetbets import main
 
 
-def intel_wallstreetbets():
-
+while True:
     main()
-
-
-intel_wallstreetbets()
 
