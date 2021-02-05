@@ -9,7 +9,7 @@ from .cleaner.clean_word import clean_word
 from .cleaner.remove_space import remove_space
 
 
-subs = ['wallstreetbets', 'wallstreetbetsnew']
+subs = ['wallstreetbets', 'wallstreetbetsnew', 'stocks']
 
 
 class TerminalColors:
@@ -27,10 +27,11 @@ class TerminalColors:
     UNDERLINE = '\033[4m'
 
 
-def print_results(word, submission):
+def print_results(word,  status, submission):
+    if word is not None:
+        cleaned_upper = clean_word(word)
+        upper_word = cleaned_upper.upper()
 
-    cleaned_upper = clean_word(word)
-    upper_word = cleaned_upper.upper()
     the_time_posted = determine_time(submission)
 
     print("")
@@ -38,7 +39,8 @@ def print_results(word, submission):
     print(submission.id)
     print(f"{TerminalColors.ENDC}{TerminalColors.OKCYAN}{submission.title}{TerminalColors.ENDC}")
     print(the_time_posted)
-    print(f"{TerminalColors.ENDC}Possible Stock Found: {TerminalColors.OKGREEN}${upper_word}{TerminalColors.ENDC} ")
+    if status is True:
+        print(f"{TerminalColors.ENDC}Possible Stock Found: {TerminalColors.OKGREEN}${upper_word}{TerminalColors.ENDC} ")
     print("")
 
 
@@ -74,28 +76,59 @@ def valid_symbol(word):
         return False
 
 
+def find_stock(thestring):
+    has_stock = False
+    f = None
+    string_split = thestring.split()
+
+    for f in string_split:
+        if (len(f) == 3 or len(f) == 4 or len(f) == 5) and f.isupper():
+
+            hasnumber = hasnumbers(f)
+
+            bannedword = banned_words(f)
+
+            if hasnumber is False and bannedword is False:
+
+                f = remove_space(f)
+                if valid_symbol(f) is True:
+                    has_stock = True
+                    f = f
+                    break
+
+                else:
+                    has_stock = False
+                    f = None
+
+            else:
+                has_stock = False
+                f = None
+
+        else:
+            has_stock = False
+            f = None
+
+    return has_stock,  f
+
+
 def main():
     reddit = reddit_api
 
     for sub in subs:
         subreddit = reddit.subreddit(sub)
-        submissions = subreddit.new(limit=20)
+
+        if sub == 'wallsteetbetsnew':
+            limit_amount = 10
+        elif sub == 'wallsteetbets':
+            limit_amount = 20
+        else:
+            limit_amount = 5
+
+        submissions = subreddit.new(limit=limit_amount)
         for submission in submissions:
 
-            time.sleep(1)
-            string_split = submission.title.split()
+            time.sleep(2)
 
-            for f in string_split:
+            find_stock_ticker, f = find_stock(submission.title)
 
-                if (len(f) == 3 or len(f) == 4) and f.isupper():
-                    hasnumber = hasnumbers(f)
-
-                    bannedword = banned_words(f)
-
-                    if hasnumber is False and bannedword is False:
-                        f = remove_space(f)
-                        if valid_symbol(f) is True:
-                            print_results(f, submission)
-
-
-
+            print_results(f, find_stock_ticker, submission)
