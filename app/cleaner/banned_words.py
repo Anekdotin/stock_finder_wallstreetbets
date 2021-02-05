@@ -29,7 +29,7 @@ banstuff = ['fuck', 'hold', 'vote', 'hodl', 'long', 'term',
             'but', 'is', 'cry', 'just', 'dont', 'then',
             'over', 'lost', 'was', 'when', 'fyi',
             'and', 'here', 'this', 'calm', 'way', 'puts',
-            'calm', 'nyse', 'IT S', 'boys',
+            'calm', 'nyse', 'IT S', 'boys', 'go', 'very', 'halt',
             'time', 'dead', 'wont', 'give', 'ape', 'army',
             'now', 'big', 'mac', 'mega', 'porn', 'loss', 'bear',
             'TILL', 'take', 'off', 'keep', 'out', 'nakd',
@@ -41,8 +41,9 @@ banstuff = ['fuck', 'hold', 'vote', 'hodl', 'long', 'term',
             'will', 'i m', 'ipo', 'rice','need',
             'usa', 'read', 'oc', 'dfv', 'per', 'coal',
             'holy', 'rh', 'pay', 'pst', 'est', 'gang',
-            'ryan', 'die', 'papa', 'than', "i'm",
-            'ceo', 'red', 'till', 'red', 'op', 'said', 'dd'
+            'ryan', 'die', 'papa', 'than', "i'm", 'idk', 'pure'
+            'ceo', 'red', 'till', 'red', 'op', 'said', 'dd',
+            'won', 'fda', 'us', 'only', 'irs', 'got', 'see', 'did'
             ]
 
 

@@ -1,14 +1,15 @@
 import re
-
+import arrow
 from reddit_api import reddit_api
 import datetime
+from datetime import timedelta
 import time
 from .cleaner.banned_words import banned_words
 from .cleaner.clean_word import clean_word
 from .cleaner.remove_space import remove_space
 
 
-subs = ['wallstreetbets', 'wallstreetbetsnew', 'stocks', 'investing']
+subs = ['wallstreetbets', 'wallstreetbetsnew']
 
 
 class TerminalColors:
@@ -37,10 +38,8 @@ def print_results(word, submission):
     print(submission.id)
     print(f"{TerminalColors.ENDC}{TerminalColors.OKCYAN}{submission.title}{TerminalColors.ENDC}")
     print(the_time_posted)
-    print(f"{TerminalColors.ENDC}Stock Found: {TerminalColors.OKGREEN}${upper_word}{TerminalColors.ENDC} ")
+    print(f"{TerminalColors.ENDC}Possible Stock Found: {TerminalColors.OKGREEN}${upper_word}{TerminalColors.ENDC} ")
     print("")
-
-
 
 
 def hasnumbers(word):
@@ -49,9 +48,13 @@ def hasnumbers(word):
 
 def determine_time(submission):
     now = int(datetime.datetime.timestamp(datetime.datetime.today()))
-    then = int(submission.created)
+    # account for time zone distance in california
+    then_now = datetime.datetime.fromtimestamp(submission.created) - (timedelta(hours=3))
 
-    return datetime.datetime.fromtimestamp(then).strftime('%Y-%m-%d %H:%M:%S')
+    utc = arrow.get(then_now)
+    local = utc.to('local')
+    readable_time = local.humanize()
+    return readable_time
 
 
 def appendword(word):
