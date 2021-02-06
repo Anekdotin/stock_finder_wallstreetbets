@@ -9,7 +9,15 @@ from .cleaner.clean_word import clean_word
 from .cleaner.remove_space import remove_space
 
 
-subs = ['wallstreetbets', 'wallstreetbetsnew', 'stocks', 'investing']
+subs = ['bitcoin',
+        'monero',
+        'Bitcoincash',
+        'ethereum',
+        'Stellar',
+        'cardano',
+        'dogecoin',
+        'Chainlink'
+        ]
 
 
 class TerminalColors:
@@ -27,10 +35,7 @@ class TerminalColors:
     UNDERLINE = '\033[4m'
 
 
-def print_results(word,  status, submission):
-    if word is not None:
-        cleaned_upper = clean_word(word)
-        upper_word = cleaned_upper.upper()
+def print_results(submission):
 
     the_time_posted = determine_time(submission)
 
@@ -38,15 +43,10 @@ def print_results(word,  status, submission):
     print(f"{TerminalColors.ENDC}{TerminalColors.WARNING}r/{submission.subreddit}{TerminalColors.ENDC}")
     print(the_time_posted)
     print(submission.id)
+
     print(f"{TerminalColors.ENDC}{TerminalColors.OKCYAN}{submission.title}{TerminalColors.ENDC}")
 
-    if status is True:
-        print(f"{TerminalColors.ENDC}Possible Stock Found: {TerminalColors.OKGREEN}${upper_word}{TerminalColors.ENDC} ")
     print("")
-
-
-def hasnumbers(word):
-    return any(char.isdigit() for char in word)
 
 
 def determine_time(submission):
@@ -60,12 +60,6 @@ def determine_time(submission):
     return readable_time
 
 
-def appendword(word):
-    word = clean_word(word)
-    word = word.upper()
-    listofstocks.append(word)
-
-
 def valid_symbol(word):
     if word.startswith('$'):
         return True
@@ -75,41 +69,6 @@ def valid_symbol(word):
 
     else:
         return False
-
-
-def find_stock(thestring):
-    has_stock = False
-    f = None
-    string_split = thestring.split()
-
-    for f in string_split:
-        if (len(f) == 3 or len(f) == 4 or len(f) == 5) and f.isupper():
-
-            hasnumber = hasnumbers(f)
-
-            bannedword = banned_words(f)
-
-            if hasnumber is False and bannedword is False:
-
-                f = remove_space(f)
-                if valid_symbol(f) is True:
-                    has_stock = True
-                    f = f
-                    break
-
-                else:
-                    has_stock = False
-                    f = None
-
-            else:
-                has_stock = False
-                f = None
-
-        else:
-            has_stock = False
-            f = None
-
-    return has_stock,  f
 
 
 def main():
@@ -131,6 +90,4 @@ def main():
 
             time.sleep(3)
 
-            find_stock_ticker, f = find_stock(submission.title)
-
-            print_results(f, find_stock_ticker, submission)
+            print_results(submission)
