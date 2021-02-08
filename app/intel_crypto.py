@@ -9,6 +9,9 @@ from .cleaner.clean_word import clean_word
 from .cleaner.remove_space import remove_space
 
 
+from app import session
+from app.models import *
+
 subs = ['bitcoin',
         'monero',
         'Bitcoincash',
@@ -50,9 +53,9 @@ def print_results(submission):
 
 
 def determine_time(submission):
-    now = int(datetime.datetime.timestamp(datetime.datetime.today()))
+
     # account for time zone distance in california
-    then_now = datetime.datetime.fromtimestamp(submission.created) - (timedelta(hours=3))
+    then_now = datetime.fromtimestamp(submission.created) - (timedelta(hours=8))
 
     utc = arrow.get(then_now)
     local = utc.to('local')

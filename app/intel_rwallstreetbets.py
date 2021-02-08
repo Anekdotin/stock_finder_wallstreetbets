@@ -8,8 +8,11 @@ from .cleaner.banned_words import banned_words
 from .cleaner.clean_word import clean_word
 from .cleaner.remove_space import remove_space
 
+from app import session
+from app.models import Stocks, StocksCount
 
-subs = ['wallstreetbets', 'wallstreetbetsnew', 'stocks', 'investing']
+
+subs = ['wallstreetbets', 'wallstreetbetsnew', 'stocks', 'investing', 'pennystocks']
 
 
 class TerminalColors:
@@ -27,10 +30,54 @@ class TerminalColors:
     UNDERLINE = '\033[4m'
 
 
+def add_symbol_todb(symbol, subreddit, reddit_post_id):
+
+    now = datetime.datetime.utcnow()
+
+    get_db_stock = session.query(Stocks) \
+        .filter(Stocks.stockname == symbol,
+                Stocks.reddit_post_id == reddit_post_id
+                ) \
+        .first()
+    if get_db_stock is None:
+        get_count_stock = session.query(StocksCount) \
+            .filter(StocksCount.stockname == symbol) \
+            .first()
+
+        if get_count_stock is None:
+            addnewentry = StocksCount(
+                stockname=symbol,
+                count=1,
+                subreddit=subreddit
+            )
+            session.add(addnewentry)
+
+        else:
+            current_number = get_count_stock.count
+            newnumber = current_number + 1
+            get_count_stock.count = newnumber
+            session.add(get_count_stock)
+
+
+        addnewstockentry = Stocks(
+            stockname=symbol,
+            subreddit=subreddit,
+            count=1,
+            first_seen=now,
+            last_seen=now,
+            reddit_post_id=reddit_post_id
+        )
+        session.add(addnewstockentry)
+
+    session.commit()
+
+
 def print_results(word,  status, submission):
     if word is not None:
         cleaned_upper = clean_word(word)
         upper_word = cleaned_upper.upper()
+    else:
+        upper_word = None
 
     the_time_posted = determine_time(submission)
 
@@ -42,6 +89,7 @@ def print_results(word,  status, submission):
 
     if status is True:
         print(f"{TerminalColors.ENDC}Possible Stock Found: {TerminalColors.OKGREEN}${upper_word}{TerminalColors.ENDC} ")
+        add_symbol_todb(symbol=upper_word, subreddit=submission.subreddit.display_name, reddit_post_id=submission.id)
     print("")
 
 
@@ -50,9 +98,8 @@ def hasnumbers(word):
 
 
 def determine_time(submission):
-    now = int(datetime.datetime.timestamp(datetime.datetime.today()))
     # account for time zone distance in california
-    then_now = datetime.datetime.fromtimestamp(submission.created) - (timedelta(hours=3))
+    then_now = datetime.datetime.fromtimestamp(submission.created) - (timedelta(hours=8))
 
     utc = arrow.get(then_now)
     local = utc.to('local')
@@ -119,14 +166,8 @@ def main():
         time.sleep(3)
         subreddit = reddit.subreddit(sub)
 
-        if sub == 'wallsteetbetsnew':
-            limit_amount = 10
-        elif sub == 'wallstreetbets':
-            limit_amount = 20
-        else:
-            limit_amount = 5
 
-        submissions = subreddit.new(limit=limit_amount)
+        submissions = subreddit.new(limit=10)
         for submission in submissions:
 
             time.sleep(3)
