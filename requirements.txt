@@ -1,3 +1,6 @@
 praw
 sqlalchemy
 arrow
+psycopg2
+matplotlib
+sqlalchemy
