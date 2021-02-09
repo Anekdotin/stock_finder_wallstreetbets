@@ -36,16 +36,16 @@ while True:
     filter_after = datetime.today() - timedelta(days=1)
 
     getlateststocks = session.query(Stocks)\
-        .filter(Stocks.subreddit == 'wallstreetbets', Stocks.last_seen >= filter_after)\
+        .filter(Stocks.subreddit == 'stocks', Stocks.last_seen >= filter_after)\
         .limit(10)
 
     for f in getlateststocks:
         last_24_hours_stocks.append(f.stockname)
 
     the_data = session.query(StocksCount)\
-        .filter(StocksCount.subreddit == 'wallstreetbets', StocksCount.stockname.in_(last_24_hours_stocks))\
+        .filter(StocksCount.subreddit == 'stocks', StocksCount.stockname.in_(last_24_hours_stocks))\
         .order_by(StocksCount.count.desc())\
-        .limit(5)
+        .limit(4)
 
     x_data = []
     y_data = []
@@ -61,7 +61,7 @@ while True:
     plt.bar(x_data, y_data, color='green')
     plt.xlabel("Symbols")
     plt.ylabel("Mentions")
-    plt.title("/r/Wallstreetbets Live Updating Graph Mentions past 24 hours..")
+    plt.title("/r/stocks Live Updating Graph Mentions past 24 hours..")
 
     plt.pause(5)
     plt.show()

@@ -27,4 +27,5 @@ class StocksCount(Base):
     subreddit = Column(String(30))
 
 
+
 Base.metadata.create_all(engine)

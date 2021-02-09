@@ -58,7 +58,6 @@ def add_symbol_todb(symbol, subreddit, reddit_post_id):
             get_count_stock.count = newnumber
             session.add(get_count_stock)
 
-
         addnewstockentry = Stocks(
             stockname=symbol,
             subreddit=subreddit,
@@ -70,6 +69,7 @@ def add_symbol_todb(symbol, subreddit, reddit_post_id):
         session.add(addnewstockentry)
 
     session.commit()
+
 
 
 def print_results(word,  status, submission):
@@ -131,31 +131,23 @@ def find_stock(thestring):
 
     for f in string_split:
         if (len(f) == 3 or len(f) == 4 or len(f) == 5) and f.isupper():
-
             hasnumber = hasnumbers(f)
-
             bannedword = banned_words(f)
-
             if hasnumber is False and bannedword is False:
-
                 f = remove_space(f)
                 if valid_symbol(f) is True:
                     has_stock = True
                     f = f
                     break
-
                 else:
                     has_stock = False
                     f = None
-
             else:
                 has_stock = False
                 f = None
-
         else:
             has_stock = False
             f = None
-
     return has_stock,  f
 
 
@@ -163,15 +155,13 @@ def main():
     reddit = reddit_api
 
     for sub in subs:
+
         time.sleep(3)
         subreddit = reddit.subreddit(sub)
-
-
         submissions = subreddit.new(limit=10)
+
         for submission in submissions:
 
             time.sleep(3)
-
             find_stock_ticker, f = find_stock(submission.title)
-
             print_results(f, find_stock_ticker, submission)
